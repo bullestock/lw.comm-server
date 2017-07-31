@@ -2,7 +2,7 @@ require('dotenv').load({ silent: true });
 
 var config = {};
 
-config.webPort = process.env.WEB_PORT || 8000;
+config.webPort = process.env.WEB_PORT || 80;
 config.serverVersion = '4.0.115';
 config.apiVersion = '4.0.6';
 
