@@ -42,6 +42,37 @@ const request = require('request'); // proxy for remote webcams
 const grblStrings = require('./grblStrings.js');
 const firmwareFeatures = require('./firmwareFeatures.js');
 
+var access_allowed = false;
+var SerialPort = require('serialport');
+var port = new SerialPort('/dev/ttyUSB0',
+                          {
+                              baudRate: 115200
+                          },
+                          function (err) {
+                              if (err) {
+                                  console.log(chalk.red('********************************************'));
+                                  console.log(chalk.red('    FATAL ERROR: Cannot open card reader    '));
+                                  console.log(chalk.red('********************************************'));
+                                  
+                                  process.exit();
+                              }
+                          });
+
+
+port.on('data', function (data) {
+    var id = data.toString('ascii').trim();
+    access_allowed = (id != 'NONE');
+});
+
+
+function check_access() {
+    if (access_allowed)
+        return true;
+    console.error(chalk.red('ERROR: Access not allowed'));
+    io.sockets.emit('error', 'ERROR: Access not allowed');
+    return false;
+}
+
 //var EventEmitter = require('events').EventEmitter;
 //var qs = require('querystring');
 
@@ -276,6 +307,8 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('connectTo', function (data) { // If a user picks a port to connect to, open a Node SerialPort Instance to it
+        if (!check_access())
+            return;
         data = data.split(',');
         writeLog(chalk.yellow('INFO: ') + chalk.blue('Connecting to ' + data), 1);
         if (!isConnected) {
@@ -1701,6 +1734,8 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('runJob', function (data) {
+        if (!check_access())
+            return;
         writeLog('Run Job (' + data.length + ')', 1);
         if (isConnected) {
             if (data) {
@@ -1763,6 +1798,8 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('runCommand', function (data) {
+        if (!check_access())
+            return;
         writeLog(chalk.red('Run Command (' + data.replace('\n', '|') + ')'), 1);
         if (isConnected) {
             if (data) {
@@ -1787,6 +1824,8 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('jog', function (data) {
+        if (!check_access())
+            return;
         writeLog(chalk.red('Jog ' + data), 1);
         if (isConnected) {
             data = data.split(',');
@@ -1840,6 +1879,8 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('jogTo', function (data) {     // data = {x:xVal, y:yVal, z:zVal, mode:0(absulute)|1(relative), feed:fVal}
+        if (!check_access())
+            return;
         writeLog(chalk.red('JogTo ' + JSON.stringify(data)), 1);
         if (isConnected) {
             if (data.x !== undefined || data.y !== undefined || data.z !== undefined) {
@@ -1889,6 +1930,8 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('setZero', function (data) {
+        if (!check_access())
+            return;
         writeLog(chalk.red('setZero(' + data + ')'), 1);
         if (isConnected) {
             switch (data) {
@@ -1930,6 +1973,8 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('gotoZero', function (data) {
+        if (!check_access())
+            return;
         writeLog(chalk.red('gotoZero(' + data + ')'), 1);
         if (isConnected) {
             switch (data) {
@@ -1961,6 +2006,8 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('setPosition', function (data) {
+        if (!check_access())
+            return;
         writeLog(chalk.red('setPosition(' + JSON.stringify(data) + ')'), 1);
         if (isConnected) {
             if (data.x !== undefined || data.y !== undefined || data.z !== undefined) {
@@ -1979,6 +2026,8 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('home', function (data) {
+        if (!check_access())
+            return;
         writeLog(chalk.red('home(' + data + ')'), 1);
         if (isConnected) {
             switch (data) {
@@ -2076,6 +2125,8 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('probe', function (data) {
+        if (!check_access())
+            return;
         writeLog(chalk.red('probe(' + JSON.stringify(data) + ')'), 1);
         if (isConnected) {
             switch (firmware) {
@@ -2110,6 +2161,8 @@ io.sockets.on('connection', function (appSocket) {
     });
     
     appSocket.on('feedOverride', function (data) {
+        if (!check_access())
+            return;
         if (isConnected) {
             switch (firmware) {
             case 'grbl':
@@ -2184,6 +2237,8 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('spindleOverride', function (data) {
+        if (!check_access())
+            return;
         if (isConnected) {
             switch (firmware) {
             case 'grbl':
@@ -2258,6 +2313,8 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('laserTest', function (data) { // Laser Test Fire
+        if (!check_access())
+            return;
         if (isConnected) {
             data = data.split(',');
             var power = parseFloat(data[0]);
@@ -2407,6 +2464,8 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('resume', function () {
+        if (!check_access())
+            return;
         if (isConnected) {
             writeLog(chalk.red('UNPAUSE'), 1);
             //io.sockets.emit('connectStatus', 'unpaused:' + port.path);
@@ -2516,6 +2575,8 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('clearAlarm', function (data) { // Clear Alarm
+        if (!check_access())
+            return;
         if (isConnected) {
             data = parseInt(data);
             writeLog('Clearing Queue: Method ' + data, 1);
@@ -2595,6 +2656,8 @@ io.sockets.on('connection', function (appSocket) {
     });
     
     appSocket.on('resetMachine', function () {
+        if (!check_access())
+            return;
         if (isConnected) {
             writeLog(chalk.red('Reset Machine'), 1);
             switch (firmware) {
