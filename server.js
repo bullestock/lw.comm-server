@@ -58,10 +58,44 @@ var port = new SerialPort('/dev/ttyUSB0',
                               }
                           });
 
-
+var last_card_id;
+const api_key = 'xxx';
 port.on('data', function (data) {
     var id = data.toString('ascii').trim();
-    access_allowed = (id != 'NONE');
+    if ((id.length == 10) && (id != last_card_id))
+    {
+        console.log('CARD '+id);
+
+        var options = {
+            url: "https://panopticon.hal9k.dk/api/v1/permissions",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                api_token: api_key,
+                card_id: id
+            }),
+            rejectUnauthorized: false
+        };
+
+        function callback(error, response, body) {
+            if (response.statusCode != 200)
+            {
+                console.log("HTTP error: "+response.statusCode);
+                access_allowed = false;
+            }
+            else
+            {
+                body = JSON.parse(response.body);
+                access_allowed = body.allowed;
+                console.log("ALLOWED: "+access_allowed);
+            }
+        }
+
+        request(options, callback);        
+        last_card_id = id;
+    }
 });
 
 
