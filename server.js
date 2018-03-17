@@ -58,13 +58,17 @@ var port = new SerialPort('/dev/ttyUSB0',
                               }
                           });
 
+var api_key = '';
+fs.readFile('apikey.txt', 'utf8', function(err, contents) {
+    api_key = contents.trim();
+});
+
 var last_card_id;
-const api_key = 'xxx';
 port.on('data', function (data) {
     var id = data.toString('ascii').trim();
     if ((id.length == 10) && (id != last_card_id))
     {
-        console.log('CARD '+id);
+        console.log('Card ID '+id);
 
         var options = {
             url: "https://panopticon.hal9k.dk/api/v1/permissions",
