@@ -345,8 +345,6 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('connectTo', function (data) { // If a user picks a port to connect to, open a Node SerialPort Instance to it
-        if (!check_access())
-            return;
         data = data.split(',');
         writeLog(chalk.yellow('INFO: ') + chalk.blue('Connecting to ' + data), 1);
         if (!isConnected) {
