@@ -63,6 +63,41 @@ fs.readFile('apikey.txt', 'utf8', function(err, contents) {
     api_key = contents.trim();
 });
 
+function log_access_attempt(user_id, name_or_card_id, allowed) {
+    var message;
+    if (allowed)
+        message = "Access allowed for "+name_or_card_id;
+    else
+        message = "Access denied for "+name_or_card_id;
+
+    var log_options = {
+        url: "https://panopticon.hal9k.dk/api/v1/logs",
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            api_token: api_key,
+            log: {
+                user_id: user_id,
+                message: message
+            }
+        }),
+        rejectUnauthorized: false
+    };
+
+    function log_callback(error, response, body) {
+        if (response.statusCode != 200)
+        {
+            console.log("Log: HTTP error: "+response.statusCode);
+            writeLog(chalk.red('ERROR: ') + chalk.blue('Failed to create log entry!'), 1);
+        }
+    }
+
+    request(log_options, log_callback);        
+}
+
 var last_card_id;
 port.on('data', function (data) {
     data = data.toString('ascii').replace("\r", "");
@@ -76,6 +111,7 @@ port.on('data', function (data) {
 
             var options = {
                 url: "https://panopticon.hal9k.dk/api/v1/permissions",
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
@@ -90,14 +126,15 @@ port.on('data', function (data) {
             function callback(error, response, body) {
                 if (response.statusCode != 200)
                 {
-                    console.log("HTTP error: "+response.statusCode);
+                    console.log("Permssions: HTTP error: "+response.statusCode);
                     access_allowed = false;
+                    log_access_attempt(body.id, body.name, false);
                 }
                 else
                 {
                     body = JSON.parse(response.body);
                     access_allowed = body.allowed;
-                    console.log("ALLOWED: "+access_allowed);
+                    log_access_attempt(body.id, body.name, true);
                 }
             }
 
