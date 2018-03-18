@@ -65,40 +65,45 @@ fs.readFile('apikey.txt', 'utf8', function(err, contents) {
 
 var last_card_id;
 port.on('data', function (data) {
-    var id = data.toString('ascii').trim();
-    if ((id.length == 10) && (id != last_card_id))
+    data = data.toString('ascii').replace("\r", "");
+    var ids = data.split("\n");
+    for (var i = 0; i < ids.length; ++i)
     {
-        console.log('Card ID '+id);
+        var id = ids[i];
+        if ((id.length == 10) && (id != last_card_id))
+        {
+            console.log('Card ID '+id);
 
-        var options = {
-            url: "https://panopticon.hal9k.dk/api/v1/permissions",
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                api_token: api_key,
-                card_id: id
-            }),
-            rejectUnauthorized: false
-        };
+            var options = {
+                url: "https://panopticon.hal9k.dk/api/v1/permissions",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    api_token: api_key,
+                    card_id: id
+                }),
+                rejectUnauthorized: false
+            };
 
-        function callback(error, response, body) {
-            if (response.statusCode != 200)
-            {
-                console.log("HTTP error: "+response.statusCode);
-                access_allowed = false;
+            function callback(error, response, body) {
+                if (response.statusCode != 200)
+                {
+                    console.log("HTTP error: "+response.statusCode);
+                    access_allowed = false;
+                }
+                else
+                {
+                    body = JSON.parse(response.body);
+                    access_allowed = body.allowed;
+                    console.log("ALLOWED: "+access_allowed);
+                }
             }
-            else
-            {
-                body = JSON.parse(response.body);
-                access_allowed = body.allowed;
-                console.log("ALLOWED: "+access_allowed);
-            }
+
+            request(options, callback);        
+            last_card_id = id;
         }
-
-        request(options, callback);        
-        last_card_id = id;
     }
 });
 
