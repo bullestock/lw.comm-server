@@ -51,7 +51,9 @@ const options = commandLineArgs(optionDefinitions)
 var access_allowed = false;
 var SerialPort = require('serialport');
 var port = null;
-if (!options.nocardreader) {
+if (options.nocardreader)
+    access_allowed = true;
+else {
     port = new SerialPort('/dev/ttyUSB0',
                           {
                               baudRate: 115200
