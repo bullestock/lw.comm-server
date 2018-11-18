@@ -47,9 +47,19 @@ const { exec } = require('child_process'); //Support for running OS commands bef
 
 exports.LWCommServer=function(config){
 
+const optionDefinitions = [
+  { name: 'nocardreader', alias: 'r', type: Boolean }
+]
+const commandLineArgs = require('command-line-args')
+const options = commandLineArgs(optionDefinitions)
+
 var access_allowed = false;
 var SerialPort = require('serialport');
-var port = new SerialPort('/dev/ttyUSB0',
+var port = null;
+if (options.nocardreader)
+    access_allowed = true;
+else {
+    port = new SerialPort('/dev/ttyUSB0',
                           {
                               baudRate: 115200
                           },
@@ -62,6 +72,7 @@ var port = new SerialPort('/dev/ttyUSB0',
                                   process.exit();
                               }
                           });
+}
 
 var api_key = '';
 fs.readFile('apikey.txt', 'utf8', function(err, contents) {
@@ -104,51 +115,52 @@ function log_access_attempt(user_id, name_or_card_id, allowed) {
 }
 
 var last_card_id;
-port.on('data', function (data) {
-    data = data.toString('ascii').replace("\r", "");
-    var ids = data.split("\n");
-    for (var i = 0; i < ids.length; ++i)
-    {
-        var id = ids[i];
-        if ((id.length == 10) && (id != last_card_id))
+if (port) {
+    port.on('data', function (data) {
+        data = data.toString('ascii').replace("\r", "");
+        var ids = data.split("\n");
+        for (var i = 0; i < ids.length; ++i)
         {
-            console.log('Card ID '+id);
+            var id = ids[i];
+            if ((id.length == 10) && (id != last_card_id))
+            {
+                console.log('Card ID '+id);
 
-            var options = {
-                url: "https://panopticon.hal9k.dk/api/v1/permissions",
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    api_token: api_key,
-                    card_id: id
-                }),
-                rejectUnauthorized: false
-            };
+                var options = {
+                    url: "https://panopticon.hal9k.dk/api/v1/permissions",
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        api_token: api_key,
+                        card_id: id
+                    }),
+                    rejectUnauthorized: false
+                };
 
-            function callback(error, response, body) {
-                if (response.statusCode != 200)
-                {
-                    console.log("Permssions: HTTP error: "+response.statusCode);
-                    access_allowed = false;
-                    log_access_attempt(body.id, body.name, false);
+                function callback(error, response, body) {
+                    if (response.statusCode != 200)
+                    {
+                        console.log("Permssions: HTTP error: "+response.statusCode);
+                        access_allowed = false;
+                        log_access_attempt(body.id, body.name, false);
+                    }
+                    else
+                    {
+                        body = JSON.parse(response.body);
+                        access_allowed = body.allowed;
+                        log_access_attempt(body.id, body.name, true);
+                    }
                 }
-                else
-                {
-                    body = JSON.parse(response.body);
-                    access_allowed = body.allowed;
-                    log_access_attempt(body.id, body.name, true);
-                }
+
+                request(options, callback);        
+                last_card_id = id;
             }
-
-            request(options, callback);        
-            last_card_id = id;
         }
-    }
-});
-
+    });
+}
 
 function check_access() {
     if (access_allowed)
