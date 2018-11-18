@@ -24,6 +24,8 @@ The server supports several interfaces to communicate with machines.
 * Smoothieware (actual version of firmware-cnc.bin)
 * TinyG (actual version)
 * MarlinKimbra (not finished)
+* Marlin (not finished)
+* RepRapFirmware (not finished)
 
 
 Please check the wiki for details about the API.
