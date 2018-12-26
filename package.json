@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "chalk": "*",
+    "command-line-args": "^5.0.2",
     "dotenv": "*",
     "node-static": "*",
     "request": "*",
@@ -91,4 +92,3 @@
     }
   }
 }
-

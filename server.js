@@ -48,7 +48,8 @@ const { exec } = require('child_process'); //Support for running OS commands bef
 exports.LWCommServer=function(config){
 
 const optionDefinitions = [
-  { name: 'nocardreader', alias: 'r', type: Boolean }
+  { name: 'nocardreader', alias: 'r', type: Boolean },
+  { name: 'noacs', alias: 'a', type: Boolean }
 ]
 const commandLineArgs = require('command-line-args')
 const options = commandLineArgs(optionDefinitions)
@@ -126,36 +127,44 @@ if (port) {
             {
                 console.log('Card ID '+id);
 
-                var options = {
-                    url: "https://panopticon.hal9k.dk/api/v1/permissions",
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        api_token: api_key,
-                        card_id: id
-                    }),
-                    rejectUnauthorized: false
-                };
+		if (options.noacs)
+		{
+                    console.log('Access allowed (no ACS)');
+                    access_allowed = true;
+		}
+		else
+		{
+                    var request_options = {
+			url: "https://panopticon.hal9k.dk/api/v1/permissions",
+			method: 'POST',
+			headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+			},
+			body: JSON.stringify({
+                            api_token: api_key,
+                            card_id: id
+			}),
+			rejectUnauthorized: false
+                    };
 
-                function callback(error, response, body) {
-                    if (response.statusCode != 200)
-                    {
-                        console.log("Permssions: HTTP error: "+response.statusCode);
-                        access_allowed = false;
-                        log_access_attempt(body.id, body.name, false);
+                    function callback(error, response, body) {
+			if (response.statusCode != 200)
+			{
+                            console.log("Permssions: HTTP error: "+response.statusCode);
+                            access_allowed = false;
+                            log_access_attempt(body.id, body.name, false);
+			}
+			else
+			{
+                            body = JSON.parse(response.body);
+                            access_allowed = body.allowed;
+                            log_access_attempt(body.id, body.name, true);
+			}
                     }
-                    else
-                    {
-                        body = JSON.parse(response.body);
-                        access_allowed = body.allowed;
-                        log_access_attempt(body.id, body.name, true);
-                    }
-                }
 
-                request(options, callback);        
+                    request(request_options, callback);
+		}
                 last_card_id = id;
             }
         }
