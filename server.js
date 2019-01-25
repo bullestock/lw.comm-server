@@ -87,6 +87,9 @@ function log_access_attempt(user_id, name_or_card_id, allowed) {
     else
         message = "Access denied for "+name_or_card_id;
 
+    io.sockets.emit('data', 'success:' + message);
+    writeLog(chalk.yellow('INFO: ') + chalk.blue(message), 1);
+
     var log_options = {
         url: "https://panopticon.hal9k.dk/api/v1/logs",
         method: 'POST',
@@ -112,7 +115,8 @@ function log_access_attempt(user_id, name_or_card_id, allowed) {
         }
     }
 
-    request(log_options, log_callback);        
+    if (!options.noacs)
+        request(log_options, log_callback);        
 }
 
 var last_card_id;
@@ -131,6 +135,7 @@ if (port) {
 		{
                     console.log('Access allowed (no ACS)');
                     access_allowed = true;
+                    log_access_attempt(42, 'Test Testersson', true);
 		}
 		else
 		{
@@ -1940,6 +1945,7 @@ io.sockets.on('connection', function (appSocket) {
                     var line = data[i].split(';'); // Remove everything after ; = comment
                     var tosend = line[0].trim();
                     if (tosend.length > 0) {
+                        //writeLog('Send ' + tosend, 1);
                         if (optimizeGcode) {
                             var newMode;
                             if (tosend.indexOf('G0') === 0) {
