@@ -469,7 +469,7 @@ io.sockets.on('connection', function (appSocket) {
                                 io.sockets.emit('connectStatus', 'closing:' + port.path);
                                 clearInterval(queueCounter);
                                 clearInterval(statusLoop);
-                                gcodeQueue.length = 0; // dump the queye
+                                gcodeQueue.length = 0; // dump the queue
                                 grblBufferSize.length = 0; // dump bufferSizes
                                 tinygBufferSize = TINYG_RX_BUFFER_SIZE; // reset tinygBufferSize
                                 reprapBufferSize = REPRAP_RX_BUFFER_SIZE; // reset reprapBufferSize
@@ -1044,7 +1044,7 @@ io.sockets.on('connection', function (appSocket) {
                                 writeLog('No supported firmware detected. Closing connection to ' + connectedTo, 1);
                                 io.sockets.emit('data', 'No supported firmware detected. Closing connection to ' + connectedTo);
                                 io.sockets.emit('connectStatus', 'closing:' + connectedTo);
-                                gcodeQueue.length = 0; // dump the queye
+                                gcodeQueue.length = 0; // dump the queue
                                 grblBufferSize.length = 0; // dump bufferSizes
                                 tinygBufferSize = TINYG_RX_BUFFER_SIZE; // reset tinygBufferSize
                                 clearInterval(queueCounter);
@@ -1485,7 +1485,7 @@ io.sockets.on('connection', function (appSocket) {
                                 writeLog('No supported firmware detected. Closing connection to ' + connectedTo, 1);
                                 io.sockets.emit('data', 'No supported firmware detected. Closing connection to ' + connectedTo);
                                 io.sockets.emit('connectStatus', 'closing:' + connectedTo);
-                                gcodeQueue.length = 0; // dump the queye
+                                gcodeQueue.length = 0; // dump the queue
                                 grblBufferSize.length = 0; // dump bufferSizes
                                 tinygBufferSize = TINYG_RX_BUFFER_SIZE; // reset tinygBufferSize
                                 reprapBufferSize = REPRAP_RX_BUFFER_SIZE; // reset reprapBufferSize
@@ -1989,7 +1989,7 @@ io.sockets.on('connection', function (appSocket) {
                     }, 500);
                     io.sockets.emit('runStatus', 'running');
 					
-					//NAB - Added to support action to run befor job starts
+		    //NAB - Added to support action to run befor job starts
                     doJobAction(config.jobOnStart);
 					
                     send1Q();
@@ -2624,7 +2624,7 @@ io.sockets.on('connection', function (appSocket) {
                                 setTimeout(function () {
                                     laserTestOn = false;
                                     appSocket.emit('laserTest', 0);
-                                }, duration );
+                                }, duration);
                             }
                             send1Q();
                             break;
@@ -2640,7 +2640,7 @@ io.sockets.on('connection', function (appSocket) {
                                 setTimeout(function () {
                                     laserTestOn = false;
                                     appSocket.emit('laserTest', 0);
-                                }, duration );
+                                }, duration);
                             }
                             send1Q();
                             break;
@@ -2658,7 +2658,7 @@ io.sockets.on('connection', function (appSocket) {
                                 setTimeout(function () {
                                     laserTestOn = false;
                                     appSocket.emit('laserTest', 0);
-                                }, duration );
+                                }, duration);
                             }
                             send1Q();
                             break;
@@ -2865,7 +2865,7 @@ io.sockets.on('connection', function (appSocket) {
             }
             clearInterval(queueCounter);
             io.sockets.emit('qCount', 0);
-            gcodeQueue.length = 0; // Dump the Queye
+            gcodeQueue.length = 0; // Dump the Queue
             grblBufferSize.length = 0; // Dump bufferSizes
             tinygBufferSize = TINYG_RX_BUFFER_SIZE;  // reset tinygBufferSize
             reprapBufferSize = REPRAP_RX_BUFFER_SIZE; // reset reprapBufferSize
@@ -3131,7 +3131,7 @@ io.sockets.on('connection', function (appSocket) {
                 break;
             case 2:
                 writeLog('Emptying Queue', 1);
-                gcodeQueue.length = 0; // Dump the Queye
+                gcodeQueue.length = 0; // Dump the Queue
                 grblBufferSize.length = 0; // Dump bufferSizes
                 tinygBufferSize = TINYG_RX_BUFFER_SIZE;  // reset tinygBufferSize
                 reprapBufferSize = REPRAP_RX_BUFFER_SIZE; // reset reprapBufferSize
@@ -3224,7 +3224,7 @@ io.sockets.on('connection', function (appSocket) {
                 writeLog(chalk.yellow('WARN: ') + chalk.blue('Closing Port ' + port.path), 1);
                 io.sockets.emit("connectStatus", 'closing:' + port.path);
                 //machineSend(String.fromCharCode(0x18)); // ctrl-x
-                gcodeQueue.length = 0; // dump the queye
+                gcodeQueue.length = 0; // dump the queue
                 grblBufferSize.length = 0; // dump bufferSizes
                 tinygBufferSize = TINYG_RX_BUFFER_SIZE; // reset tinygBufferSize
                 reprapBufferSize = REPRAP_RX_BUFFER_SIZE; // reset reprapBufferSize
@@ -3237,7 +3237,7 @@ io.sockets.on('connection', function (appSocket) {
                 writeLog(chalk.yellow('WARN: ') + chalk.blue('Closing Telnet @ ' + connectedIp), 1);
                 io.sockets.emit("connectStatus", 'closing:' + connectedIp);
                 //machineSend(String.fromCharCode(0x18)); // ctrl-x
-                gcodeQueue.length = 0; // dump the queye
+                gcodeQueue.length = 0; // dump the queue
                 grblBufferSize.length = 0; // dump bufferSizes
                 tinygBufferSize = TINYG_RX_BUFFER_SIZE; // reset tinygBufferSize
                 reprapBufferSize = REPRAP_RX_BUFFER_SIZE; // reset reprapBufferSize
@@ -3250,7 +3250,7 @@ io.sockets.on('connection', function (appSocket) {
                 writeLog(chalk.yellow('WARN: ') + chalk.blue('Closing ESP @ ' + connectedIp), 1);
                 io.sockets.emit("connectStatus", 'closing:' + connectedIp);
                 //machineSend(String.fromCharCode(0x18)); // ctrl-x
-                gcodeQueue.length = 0; // dump the queye
+                gcodeQueue.length = 0; // dump the queue
                 grblBufferSize.length = 0; // dump bufferSizes
                 tinygBufferSize = TINYG_RX_BUFFER_SIZE; // reset tinygBufferSize
                 reprapBufferSize = REPRAP_RX_BUFFER_SIZE; // reset reprapBufferSize
@@ -3460,7 +3460,7 @@ function send1Q() {
                 writeLog("Elapsed time: " + elapsedTime + " seconds.", 1);
                 writeLog('Ave. Speed: ' + speed + ' lines/s', 1);
             }
-            gcodeQueue.length = 0; // Dump the Queye
+            gcodeQueue.length = 0; // Dump the Queue
             grblBufferSize.length = 0; // Dump bufferSizes
             tinygBufferSize = TINYG_RX_BUFFER_SIZE;  // reset tinygBufferSize
             reprapBufferSize = REPRAP_RX_BUFFER_SIZE;  // reset tinygBufferSize
