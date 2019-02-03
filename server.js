@@ -3273,6 +3273,35 @@ io.sockets.on('connection', function (appSocket) {
         connections.splice(id, 1);
     });    
 
+    appSocket.on('exhaustOn', function (data) { // Exhaust on
+        if (isConnected) {
+            writeLog(chalk.red('Exhaust on'), 1);
+            switch (firmware) {
+            case 'grbl':
+                machineSend(data[0] == '1' ? '$M44\n' : '$M45\n');
+                break;
+            }
+        } else {
+            io.sockets.emit("connectStatus", 'closed');
+            io.sockets.emit('connectStatus', 'Connect');
+            writeLog(chalk.red('ERROR: ') + chalk.blue('Machine connection not open!'), 1);
+        }
+    });
+
+    appSocket.on('powerOff', function (data) { // Power off
+        if (isConnected) {
+            writeLog(chalk.red('Power off'), 1);
+            switch (firmware) {
+            case 'grbl':
+                machineSend('$M46\n');
+                break;
+            }
+        } else {
+            io.sockets.emit("connectStatus", 'closed');
+            io.sockets.emit('connectStatus', 'Connect');
+            writeLog(chalk.red('ERROR: ') + chalk.blue('Machine connection not open!'), 1);
+        }
+    });
 }); // End appSocket
 
 
