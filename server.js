@@ -184,6 +184,9 @@ function check_access() {
     return false;
 }
 
+var lastRunTime = null;
+var fanOn = false;
+
 //var EventEmitter = require('events').EventEmitter;
 //var qs = require('querystring');
 
@@ -527,6 +530,19 @@ io.sockets.on('connection', function (appSocket) {
                         //appSocket.emit('runStatus', state);
                         io.sockets.emit('data', data);
                         if (firmware == 'grbl') {
+                            if (data.indexOf('<') === 0) {
+                                var state = data.substring(1, data.search(/\|/));
+                                if (state == 'Run') {
+                                    lastRunTime = Date.now();
+                                    fanOn = true;
+                                }
+                                else if (fanOn && (state == 'Idle'))
+                                    if ((Date.now() - lastRunTime)/1000 > config.fanOnTime) {
+                                        machineSend('M9\n');
+                                        writeLog(chalk.yellow('INFO: ') + chalk.blue('Fan off'), 1);
+                                        fanOn = false;
+                                    }
+                            }
                             // Extract wPos (for Grbl > 1.1 only!)
                             var startWPos = data.search(/wpos:/i) + 5;
                             var wPos;
