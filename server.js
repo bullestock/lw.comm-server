@@ -3328,7 +3328,7 @@ io.sockets.on('connection', function (appSocket) {
             writeLog(chalk.red('Exhaust on'), 1);
             switch (firmware) {
             case 'grbl':
-                machineSend(data[0] == '1' ? '$M44\n' : '$M45\n');
+                machineSend(data[0] == '1' ? 'M8\n' : 'M9\n');
                 break;
             }
         } else {
