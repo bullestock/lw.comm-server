@@ -303,7 +303,7 @@ io.sockets.on('connection', function (appSocket) {
         portsList = ports;
         appSocket.emit('ports', portsList);
     });
-    // reckeck ports every 2s
+    // recheck ports every 2s
     listPortsLoop = setInterval(function () {
         serialport.list(function (err, ports) {
             if (JSON.stringify(ports) != JSON.stringify(portsList)) {
