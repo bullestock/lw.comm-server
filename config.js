@@ -31,3 +31,5 @@ config.fanOnTime = 60; // seconds
 config.uipath = path.join(__dirname, '/app')
 
 module.exports = config;
+
+config.autoLoadProfile = true;
