@@ -156,7 +156,7 @@ if (port) {
                     function callback(error, response, body) {
 			if (response.statusCode != 200)
 			{
-                            console.log("Permssions: HTTP error: "+response.statusCode);
+                            console.log("Permissions: HTTP error: "+response.statusCode);
                             access_allowed = false;
                             log_access_attempt(body.id, body.name, false);
 			}
@@ -164,6 +164,7 @@ if (port) {
 			{
                             body = JSON.parse(response.body);
                             access_allowed = body.allowed;
+                            console.log("Permissions: " + body.name + ": " + access_allowed);
                             log_access_attempt(body.id, body.name, true);
 			}
                     }
