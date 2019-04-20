@@ -127,7 +127,12 @@ if (port) {
         for (var i = 0; i < ids.length; ++i)
         {
             var id = ids[i];
-            if ((id.length == 10) && (id != last_card_id))
+            if (id == 'NONE')
+            {
+                access_allowed = false;
+                last_card_id = '';
+            }
+            else if ((id.length == 10) && (id != last_card_id))
             {
                 console.log('Card ID '+id);
 
