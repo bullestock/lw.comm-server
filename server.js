@@ -3444,7 +3444,7 @@ function send1Q() {
                     }
                 }
             } else {
-                while ((queueLen - queuePointer) > 0 && !blocked && !paused) {
+                while ((queueLen - queuePointer) > 0 && queuePointer < gcodeQueue.length && !blocked && !paused) {
                     spaceLeft = grblBufferSpace();
                     gcodeLen = gcodeQueue[queuePointer].length;
                     if (gcodeLen < spaceLeft) {
