@@ -21,12 +21,8 @@
   },
   "dependencies": {
     "chalk": "*",
-<<<<<<< HEAD
     "command-line-args": "^5.0.2",
-    "dotenv": "*",
-=======
     "dotenv": "8.x",
->>>>>>> upstream/master
     "node-static": "*",
     "request": "*",
     "serialport": "7.x",
