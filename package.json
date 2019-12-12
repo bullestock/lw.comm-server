@@ -1,6 +1,6 @@
 {
   "name": "lw.comm-server",
-  "version": "4.0.134",
+  "version": "4.0.136",
   "license": "AGPL-3.0",
   "description": "Unified communications server for LaserWeb/CNCweb",
   "author": "github.com/LaserWeb",
@@ -13,21 +13,25 @@
     "url": "git+https://github.com/LaserWeb/lw.comm-server.git"
   },
   "devDependencies": {
-    "copyfiles": "^1.2.0",
-    "electron": "^1.8.8",
-    "electron-builder": "^14.5.3",
-    "electron-rebuild": "^1.8.2",
-    "ncp": "^2.0.0"
+    "copyfiles": "1.2.x",
+    "electron": "1.8.x",
+    "electron-builder": "14.5.x",
+    "electron-rebuild": "1.8.x",
+    "ncp": "2.0.x"
   },
   "dependencies": {
     "chalk": "*",
+<<<<<<< HEAD
     "command-line-args": "^5.0.2",
     "dotenv": "*",
+=======
+    "dotenv": "8.x",
+>>>>>>> upstream/master
     "node-static": "*",
     "request": "*",
-    "serialport": "^6.2.2",
-    "socket.io": "^1.7.4",
-    "ws": "^1.1.5"
+    "serialport": "7.x",
+    "socket.io": "1.7.x",
+    "ws": "^1.1.x"
   },
   "bugs": {
     "url": "https://github.com/LaserWeb/lw.comm-server/issues"
@@ -60,6 +64,10 @@
     "gateway",
     "ESP8266"
   ],
+  "engines": {
+    "node": ">=10.15.1",
+    "npm": ">=6.4.1"
+  },
   "build": {
     "appId": "xyz.laserweb",
     "productName": "LaserWeb",
