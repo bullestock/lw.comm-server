@@ -3365,7 +3365,11 @@ io.sockets.on('connection', function (appSocket) {
             writeLog(chalk.red('Power off'), 1);
             switch (firmware) {
             case 'grbl':
+                doJobAction('sync');
                 machineSend('$M46\n');
+                break;
+            default:
+                writeLog(chalk.red('ERROR: No support for poweroff for ' + firmware), 1);
                 break;
             }
         } else {
@@ -3603,7 +3607,6 @@ function writeLog(line, verb) {
 //Action = command line specific for OS
 function doJobAction(action) {
 
-    //NAB - Added to support action to run after job completes
     if (typeof action === 'string' && action.length > 0) {
         try {
             exec(action);
@@ -3611,9 +3614,7 @@ function doJobAction(action) {
             //Unable to start jobAfter command
             writeLog(chalk.red('ERROR: ') + chalk.blue('Error on job command: ' + e.message + ' for action: ' + action), 2);
         }
-
     }
-
 }
 
 }
