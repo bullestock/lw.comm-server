@@ -108,7 +108,7 @@ function log_access_attempt(user_id, name_or_card_id, allowed) {
     };
 
     function log_callback(error, response, body) {
-        if (response.statusCode != 200)
+        if (response && response.statusCode != 200)
         {
             console.log("Log: HTTP error: "+response.statusCode);
             writeLog(chalk.red('ERROR: ') + chalk.blue('Failed to create log entry!'), 1);
@@ -122,6 +122,7 @@ function log_access_attempt(user_id, name_or_card_id, allowed) {
 var last_card_id;
 if (port) {
     port.on('data', function (data) {
+	//console.log('DATA: '+data);
         data = data.toString('ascii').replace("\r", "");
         var ids = data.split("\n");
         for (var i = 0; i < ids.length; ++i)
@@ -159,6 +160,8 @@ if (port) {
                     };
 
                     function callback(error, response, body) {
+			if (!response)
+			    return;
 			if (response.statusCode != 200)
 			{
                             console.log("Permissions: HTTP error: "+response.statusCode);
