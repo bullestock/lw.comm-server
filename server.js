@@ -296,6 +296,14 @@ var app = http.createServer(function (req, res) {
 app.listen(config.webPort);
 var io = websockets.listen(app);
 
+function resetPowerTimer() {
+    console.log('Reset power timer');
+    setInterval(function () {
+        console.log('Power timer expired');
+        doJobAction('sync');
+        machineSend('$M46\n');
+    }, 15*60*1000);
+}
 
 // WebSocket connection from frontend
 io.sockets.on('connection', function (appSocket) {
@@ -373,16 +381,19 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('getServerConfig', function () { // Deliver config of server (incl. versions)
+        resetPowerTimer();
         writeLog(chalk.yellow('INFO: ') + chalk.blue('Requesting Server Config '), 1);
         appSocket.emit('serverConfig', config);
     });
 
     appSocket.on('getInterfaces', function () { // Deliver supported Interfaces
+        resetPowerTimer();
         writeLog(chalk.yellow('INFO: ') + chalk.blue('Requesting Interfaces '), 1);
         appSocket.emit('interfaces', supportedInterfaces);
     });
 
     appSocket.on('getPorts', function () { // Refresh serial port list
+        resetPowerTimer();
         writeLog(chalk.yellow('INFO: ') + chalk.blue('Requesting Ports list '), 1);
         serialport.list(function (err, ports) {
             appSocket.emit('ports', ports);
@@ -390,6 +401,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('getConnectStatus', function () { // Report active serial port to web-client
+        resetPowerTimer();
         writeLog(chalk.yellow('INFO: ') + chalk.blue('getConnectStatus'), 1);
         if (isConnected) {
             appSocket.emit('activeInterface', connectionType);
@@ -417,18 +429,22 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('getFirmware', function (data) { // Deliver Firmware to Web-Client
+        resetPowerTimer();
         appSocket.emit('firmware', {firmware: firmware, version: fVersion, date: fDate});
     });
 
     appSocket.on('getFeatureList', function (data) { // Deliver supported Firmware Features to Web-Client
+        resetPowerTimer();
         appSocket.emit('featureList', firmwareFeatures.get(firmware));
     });
 
     appSocket.on('getRunningJob', function (data) { // Deliver running Job to Web-Client
+        resetPowerTimer();
         appSocket.emit('runningJob', runningJob);
     });
 
     appSocket.on('connectTo', function (data) { // If a user picks a port to connect to, open a Node SerialPort Instance to it
+        resetPowerTimer();
         data = data.split(',');
         writeLog(chalk.yellow('INFO: ') + chalk.blue('Connecting to ' + data), 1);
         if (!isConnected) {
@@ -524,7 +540,7 @@ io.sockets.on('connection', function (appSocket) {
 
                 parser.on('data', function (data) {
                     //data = data.toString().trimStart();
-                    writeLog('Recv: ' + data, 3);
+                    //writeLog('Recv: ' + data, 3);
                     if (data.indexOf('ok') === 0) { // Got an OK so we are clear to send
                         if (firmware === 'grbl') {
                             grblBufferSize.shift();
@@ -1978,6 +1994,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('runJob', function (data) {
+        resetPowerTimer();
         if (!check_access())
             return;
         writeLog('Run Job (' + data.length + ')', 1);
@@ -2047,6 +2064,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('runCommand', function (data) {
+        resetPowerTimer();
         if (!check_access())
             return;
         writeLog(chalk.red('Run Command (' + data.replace('\n', '|') + ')'), 1);
@@ -2073,6 +2091,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('jog', function (data) {
+        resetPowerTimer();
         if (!check_access())
             return;
         writeLog(chalk.red('Jog ' + data), 1);
@@ -2141,6 +2160,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('jogTo', function (data) {     // data = {x:xVal, y:yVal, z:zVal, mode:0(absulute)|1(relative), feed:fVal}
+        resetPowerTimer();
         if (!check_access())
             return;
         writeLog(chalk.red('JogTo ' + JSON.stringify(data)), 1);
@@ -2206,6 +2226,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('setZero', function (data) {
+        resetPowerTimer();
         if (!check_access())
             return;
         writeLog(chalk.red('setZero(' + data + ')'), 1);
@@ -2266,6 +2287,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('gotoZero', function (data) {
+        resetPowerTimer();
         if (!check_access())
             return;
         writeLog(chalk.red('gotoZero(' + data + ')'), 1);
@@ -2299,6 +2321,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('setPosition', function (data) {
+        resetPowerTimer();
         if (!check_access())
             return;
         writeLog(chalk.red('setPosition(' + JSON.stringify(data) + ')'), 1);
@@ -2319,6 +2342,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('home', function (data) {
+        resetPowerTimer();
         if (!check_access())
             return;
         writeLog(chalk.red('home(' + data + ')'), 1);
@@ -2459,6 +2483,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('probe', function (data) {
+        resetPowerTimer();
         if (!check_access())
             return;
         writeLog(chalk.red('probe(' + JSON.stringify(data) + ')'), 1);
@@ -2503,6 +2528,7 @@ io.sockets.on('connection', function (appSocket) {
     });
     
     appSocket.on('feedOverride', function (data) {
+        resetPowerTimer();
         if (!check_access())
             return;
         if (isConnected) {
@@ -2580,6 +2606,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('spindleOverride', function (data) {
+        resetPowerTimer();
         if (!check_access())
             return;
         if (isConnected) {
@@ -2657,6 +2684,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('laserTest', function (data) { // Laser Test Fire
+        resetPowerTimer();
         if (!check_access())
             return;
         if (isConnected) {
@@ -2813,6 +2841,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('pause', function () {
+        resetPowerTimer();
         if (isConnected) {
             paused = true;
             writeLog(chalk.red('PAUSE'), 1);
@@ -2854,6 +2883,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('resume', function () {
+        resetPowerTimer();
         if (!check_access())
             return;
         if (isConnected) {
@@ -2894,6 +2924,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('stop', function () {
+        resetPowerTimer();
         if (isConnected) {
             paused = true;
             writeLog(chalk.red('STOP'), 1);
@@ -2966,6 +2997,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('sd.list', function () {  // List SD content
+        resetPowerTimer();
         if (isConnected) {
             writeLog(chalk.red('sd.list'), 1);
             switch (firmware) {
@@ -2989,6 +3021,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('sd.cd', function (data) {  // Change directory
+        resetPowerTimer();
         if (isConnected) {
             writeLog(chalk.red('sd.cd'), 1);
             switch (firmware) {
@@ -3008,6 +3041,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('sd.rm', function (data) {  // Delete file
+        resetPowerTimer();
         if (isConnected) {
             writeLog(chalk.red('sd.rm'), 1);
             switch (firmware) {
@@ -3028,6 +3062,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('sd.mv', function (data) {  // Rename/move file
+        resetPowerTimer();
         if (isConnected) {
             writeLog(chalk.red('sd.mv'), 1);
             switch (firmware) {
@@ -3046,6 +3081,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('sd.play', function (data) {  // Play file
+        resetPowerTimer();
         if (isConnected) {
             writeLog(chalk.red('sd.play'), 1);
             switch (firmware) {
@@ -3068,6 +3104,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('sd.pause', function () {  // Abort SD print
+        resetPowerTimer();
         if (isConnected) {
             writeLog(chalk.red('sd.abort'), 1);
             switch (firmware) {
@@ -3088,6 +3125,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('sd.resume', function () {  // Resume SD print
+        resetPowerTimer();
         if (isConnected) {
             writeLog(chalk.red('sd.resume'), 1);
             switch (firmware) {
@@ -3108,6 +3146,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('sd.abort', function () {  // Abort SD print
+        resetPowerTimer();
         if (isConnected) {
             writeLog(chalk.red('sd.abort'), 1);
             switch (firmware) {
@@ -3128,6 +3167,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('sd.upload', function (data) {  // Upload file to SD
+        resetPowerTimer();
         if (isConnected) {
             writeLog(chalk.red('sd.upload'), 1);
             switch (firmware) {
@@ -3151,6 +3191,7 @@ io.sockets.on('connection', function (appSocket) {
     });
 
     appSocket.on('sd.progress', function (data) {  // Get SD print progress
+        resetPowerTimer();
         if (isConnected) {
             writeLog(chalk.red('sd.progtress'), 1);
             switch (firmware) {
@@ -3171,6 +3212,7 @@ io.sockets.on('connection', function (appSocket) {
     });
     
     appSocket.on('clearAlarm', function (data) { // Clear Alarm
+        resetPowerTimer();
         if (!check_access())
             return;
         if (isConnected) {
@@ -3260,6 +3302,7 @@ io.sockets.on('connection', function (appSocket) {
     });
     
     appSocket.on('resetMachine', function () {
+        resetPowerTimer();
         if (!check_access())
             return;
         if (isConnected) {
@@ -3293,6 +3336,7 @@ io.sockets.on('connection', function (appSocket) {
     });
     
     appSocket.on('closePort', function (data) { // Close machine port and dump queue
+        resetPowerTimer();
         if (isConnected) {
             switch (connectionType) {
             case 'usb':
@@ -3343,12 +3387,14 @@ io.sockets.on('connection', function (appSocket) {
     });
     
     appSocket.on('disconnect', function () { // App disconnected
+        resetPowerTimer();
         let id = connections.indexOf(appSocket);
         writeLog(chalk.yellow('App disconnected! (id=' + id + ')'), 1);
         connections.splice(id, 1);
     });    
 
     appSocket.on('exhaustOn', function (data) { // Exhaust on
+        resetPowerTimer();
         if (isConnected) {
             writeLog(chalk.red('Exhaust on'), 1);
             switch (firmware) {
